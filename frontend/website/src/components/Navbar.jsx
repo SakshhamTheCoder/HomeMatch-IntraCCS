@@ -52,7 +52,7 @@ const Navbar = () => {
 //         <div className="text-white text-2xl font-bold flex items-center">
 //           <Link to="/" className="mr-4">Your Logo</Link>
 //         </div>
-        
+
 //         {/* Navigation Links */}
 //         <div className="flex space-x-4">
 //           <Link to="/" className="text-gray-300 hover:text-white">Home</Link>
