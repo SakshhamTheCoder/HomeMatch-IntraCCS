@@ -1,17 +1,18 @@
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
-import Gallery from './pages/Gallery';
 import FAQ from './pages/FAQ';
 import About from './pages/About';
 import Advertise from './pages/Advertise';
-
-
+import Footer from './components/Footer';
+import Scrollbar from './components/Scrollbar';
 
 function Layout() {
   return (
     <>
       <Navbar />
+      <Footer />
+      <Scrollbar />
       <Outlet />
     </>
   );
@@ -24,10 +25,6 @@ const router = createBrowserRouter([
       {
         path: '/',
         element: <Home />
-      },
-      {
-        path: '/gallery',
-        element: <Gallery />
       },
       {
         path: '/faq',
