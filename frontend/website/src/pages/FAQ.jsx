@@ -22,7 +22,7 @@ const Faq = () => {
         }}
       ></div>
 
-      <h1 className="text-2xl font-bold my-4 text-[rgb(230,36,146)] font-semibold relative z-10">Frequently Asked Questions</h1>
+      <h1 className="text-2xl font-bold my-4 text-[rgb(230,36,146)] relative z-10">Frequently Asked Questions</h1>
       <div className="wrapper z-10">
         {/* FAQ items */}
         <div className="faq max-w-2xl">
