@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import image5 from '../assets/logo_re.jpg';
 
 const Navbar = () => {
     const links = [
@@ -16,9 +17,13 @@ const Navbar = () => {
             path: '/faq'
         },
         {
+            name: 'Explore',
+            path: '/explore'
+        },
+        {
             name: 'Why Home Match?',
             path: '/advertise'
-        },
+        }
     ];
 
     return (
@@ -27,8 +32,10 @@ const Navbar = () => {
                 <p className='p-4'>Hacktify</p>
                 <p className='select-none'>|</p>
                 <p className='p-4'>Home Match</p>
+                <p className='select-none'>|</p>
+                <img src={image5} alt="" className='pl-4 pb-1.25 '/>
             </div>
-            <div className='flex items-center justify-center flex-1'>
+            <div className='flex items-center justify-center flex-1 '>
                 {links.map((link, index) => (
                     <Link key={index} to={link.path}>
                         <p className="p-4 hover:text-secondary transition duration-150">

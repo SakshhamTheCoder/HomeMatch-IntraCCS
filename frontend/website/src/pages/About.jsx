@@ -15,12 +15,12 @@ const About = () => {
   ];
 
   return (
-    <div className='flex min-h-screen flex-col items-center pt-16'>
+    <div className='flex min-h-screen flex-col items-center pt-7'>
       <h1 className="text-4xl font-bold text-[rgb(2,78,146)] mb-4">About Us</h1>
       <h2 className="text-2xl mb-8">Made with love by:</h2>
-      <div className="details grid grid-cols-1 md:grid-cols-4 gap-8 w-full max-w-5xl px-4">
+      <div className="details grid grid-cols-1 md:grid-cols-4 gap-4 w-full max-w-7xl px-4 pl-0 pr-0 pt-0 pb-0">
         {members.map((member, index) => (
-          <div key={index} className="member bg-white rounded-lg shadow p-6 text-center w-full md:w-auto">
+          <div key={index} className="member bg-white rounded-lg shadow p-6 text-center w-full md:w-auto ">
             <h3 className="text-lg font-bold mb-4 text-green-500">{member.name}</h3>
             <img className="mx-auto mb-4" src={member.image} alt={member.name} />
             <div className="social-icons flex justify-center space-x-4">
@@ -37,7 +37,7 @@ const About = () => {
           </div>
         ))}
       </div>
-      <p className='pt-3'>You may check us out at our social media handles!</p>
+      <p className='pt-3'>You may check us out at our social media handles! ❤️</p>
     </div>
   );
 };
