@@ -6,6 +6,7 @@ import About from './pages/About';
 import Advertise from './pages/Advertise';
 import Footer from './components/Footer';
 import Scrollbar from './components/Scrollbar';
+import Explore from  './pages/Explore';
 
 function Layout() {
   return (
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: '/advertise',
         element: <Advertise />
+      },
+      {
+        path: '/explore',
+        element: <Explore />
       }
     ]
   }

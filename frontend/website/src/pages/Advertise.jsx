@@ -13,7 +13,7 @@ const Advertise = () => {
       {/* <div className="my-8 border-t-2 border-gray-900"></div> */}
       <p className='font-bold'>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</p>
       <br/>
-      <div className="flex items-center mb-8"> {/* Section 1 */}
+      <div className="box flex items-center mb-8 jadoo"> {/* Section 1 */}
         <img src={news1} alt="" className="w-1/2 h-auto mr-4" /> {/* Left aligned image */}
         <div className="w-1/2 flex flex-col items-center justify-center font-serif"> {/* Right aligned text */}
           {/* Text 1 */}
@@ -24,7 +24,7 @@ const Advertise = () => {
         </div>
       </div>
       
-      <div className="flex items-center mb-8"> {/* Section 2 */}
+      <div className="box flex items-center mb-8 jadoo"> {/* Section 2 */}
         <div className="w-1/2 flex flex-col items-center justify-center font-serif"> {/* Left aligned text */}
           {/* Text 2 */}
           <p className="text-lg text-center text-[rgb(72,101,146)] pl-4"> This article by <a href='https://www.thehindu.com/news/cities/bangalore/there-are-houses-for-rent-in-bengaluru-but-too-many-conditions-apply/article66985129.ece'
@@ -36,7 +36,7 @@ const Advertise = () => {
         <img src={news2} alt="" className="w-1/2 h-auto ml-4" /> {/* Right aligned image */}
       </div>
       
-      <div className="flex items-center mb-8"> {/* Section 3 */}
+      <div className="box flex items-center mb-8 jadoo"> {/* Section 3 */}
         <img src={news3} alt="" className="w-1/2 h-auto mr-4" /> {/* Left aligned image */}
         <div className="w-1/2 flex flex-col items-center justify-center font-serif"> {/* Right aligned text */}
           {/* Text 3 */}
@@ -46,20 +46,16 @@ const Advertise = () => {
         </div>
       </div>
 
-      <div className="flex items-center mb-8"> {/* Section 4 */}
+      <div className="box flex items-center mb-8 jadoo"> {/* Section 4 */}
       <div className="w-1/2 flex flex-col items-center justify-center font-serif"> {/* Centered content with Times New Roman font family */}
-  {/* Text 4 */}
-  <p className="text-lg text-center text-[rgb(72,101,146)] pl-4"> {/* Increased text size, centered, and color set to RGB(50,98,129) */}
-    Another article by <a href='https://economictimes.indiatimes.com/industry/services/property-/-cstruction/housing-rents-up-25-30-in-major-cities-since-2019-report/articleshow/107105316.cms?from=mdr' 
-    rel='nofollow' 
-    className='text-blue-500 underline'>ETPrime</a> shows that this rise is due to higher demand, limited supply, and inflation. The post-pandemic return to cities has intensified competition for rentals, making housing affordability a critical issue.
-  </p>
-</div>
-
-
+      {/* Text 4 */}
+      <p className="text-lg text-center text-[rgb(72,101,146)] pl-4"> {/* Increased text size, centered, and color set to RGB(50,98,129) */}
+      Another article by <a href='https://economictimes.indiatimes.com/industry/services/property-/-cstruction/housing-rents-up-25-30-in-major-cities-since-2019-report/articleshow/107105316.cms?from=mdr' 
+      rel='nofollow' className='text-blue-500 underline'>ETPrime</a> shows that this rise is due to higher demand, limited supply, and inflation. The post-pandemic return to cities has intensified competition for rentals, making housing affordability a critical issue.
+      </p>
+      </div>
         <img src={news4} alt="" className="w-1/2 h-auto ml-4" /> {/* Right aligned image */}
       </div>
-
       <br/>
     </div>
   );
