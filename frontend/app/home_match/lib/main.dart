@@ -1,15 +1,23 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:home_match/home.dart';
+import 'package:home_match/firebase_options.dart';
+import 'package:home_match/home_page.dart';
+import 'package:home_match/login.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
     MaterialApp(
       title: 'HomeMatch',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
       ),
-      home: LandingPage(),
-      routes: {},
+      home: const Login(),
+      routes: {
+        '/homepage': (context) => const HomePage(),
+        '/login': (context) => const Login(),
+      },
     ),
   );
 }

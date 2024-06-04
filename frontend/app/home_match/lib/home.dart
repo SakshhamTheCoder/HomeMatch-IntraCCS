@@ -42,7 +42,7 @@ class _LandingPageState extends State<LandingPage> {
                 margin: const EdgeInsets.only(left: 20, right: 20, top: 40),
                 // padding: const EdgeInsets.only(left: 20, top: 15),
                 decoration: BoxDecoration(
-                  color: Color.fromARGB(129, 164, 236, 254),
+                  color: const Color.fromARGB(129, 164, 236, 254),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
@@ -69,7 +69,7 @@ class _LandingPageState extends State<LandingPage> {
                     const SizedBox(
                       width: 10,
                     ),
-                    Container(
+                    SizedBox(
                         height: 25,
                         width: 30,
                         child: SvgPicture.asset('./icons/right_arrow.svg')),
@@ -126,7 +126,7 @@ class recommendationList extends StatelessWidget {
             return Container(
               height: 150,
               decoration: BoxDecoration(
-                color: Color.fromARGB(54, 245, 38, 38),
+                color: const Color.fromARGB(54, 245, 38, 38),
                 borderRadius: BorderRadius.circular(10),
                 // boxShadow: [
                 //   BoxShadow(
