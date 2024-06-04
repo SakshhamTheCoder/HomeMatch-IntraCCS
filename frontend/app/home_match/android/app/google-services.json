@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "444103858993",
+    "project_id": "my-ccs",
+    "storage_bucket": "my-ccs.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444103858993:android:3a668c31940460a51c2e10",
+        "android_client_info": {
+          "package_name": "com.stg.home_match"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsu8WjjoeI41dt3EzZx468-zsga3qf1Dc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
