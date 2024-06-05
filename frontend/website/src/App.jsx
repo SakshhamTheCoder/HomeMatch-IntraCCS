@@ -1,3 +1,4 @@
+// src/App.jsx
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -23,31 +24,29 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Home />
+        element: <Home />,
       },
       {
         path: '/faq',
-        element: <FAQ />
+        element: <FAQ />,
       },
       {
         path: '/about',
-        element: <About />
+        element: <About />,
       },
       {
         path: '/advertise',
-        element: <Advertise />
+        element: <Advertise />,
       },
       {
         path: '/explore',
-        element: <Explore />
-      }
-    ]
-  }
+        element: <Explore />,
+      },
+    ],
+  },
 ]);
 
-
 function App({ routes }) {
-
   return (
     <>
       <RouterProvider router={router} />
@@ -56,4 +55,3 @@ function App({ routes }) {
 }
 
 export default App;
-
