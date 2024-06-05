@@ -8,7 +8,7 @@ import Image4 from '../assets/vidyt.jpeg';
 
 const About = () => {
   const members = [
-    { name: "Dhruv Goyal", image: Image1, instagram: "https://www.instagram.com/agent__dg/", linkedin: "https://www.linkedin.com/in/DhruvGoyalThapar/", github: "https://github.com/dhruv621999" },
+    { name: "Dhruv Goyal", image: Image1, instagram: "https://www.instagram.com/agent__dg/", linkedin: "https://www.linkedin.com/in/DhruvGoyalThapar/", github: "https://github.com/DhruvGoyal404" },
     { name: "Sakshham Bhagat", image: Image2, instagram: "https://www.instagram.com/iamsakshham_28/", linkedin: "https://www.linkedin.com/in/sakshhamthecoder/", github: "https://github.com/SakshhamTheCoder" },
     { name: "Akshat Bakshi", image: Image3, instagram: "https://www.instagram.com/akshat_bakshi05/", linkedin: "https://www.linkedin.com/in/abakshi05/", github: "https://github.com/akshat448" },
     { name: "Vidyt Bhudolia", image: Image4, instagram: "https://www.instagram.com/bhudolia_/", linkedin: "https://www.linkedin.com/in/vidyt-bhudolia", github: "https://github.com/VidytBhudolia" }
