@@ -140,7 +140,7 @@ const Faq = () => {
             />
           </button>
           <div className={`pannel px-3 py-2 bg-white shadow-md ${activeAccordion === 6 ? 'block' : 'hidden'}`}>
-            <p>If you have any additional questions or need further assistance, please don't hesitate to contact our customer support team. You can reach us via email, phone, or through the contact form on our website. We're here to help!<br />Email: xyz@gmail.com<br />Ph. Number: 123456789</p>
+            <p>If you have any additional questions or need further assistance, please don't hesitate to contact our customer support team. You can reach us via email, phone, or through the contact form on our website. We're here to help!<br />Email: homematch@gmail.com<br />Ph. Number: 123456789</p>
           </div>
         </div>
       </div>

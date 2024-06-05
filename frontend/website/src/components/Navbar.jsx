@@ -12,25 +12,30 @@ const Navbar = () => {
             number: 1
         },
         {
-            name: 'About Us',
-            path: '/about',
+            name: 'Who are we?',
+            path: '/content',
             number: 2
-        },
-        {
-            name: 'FAQ',
-            path: '/faq',
-            number: 3
-        },
-        {
-            name: 'Explore',
-            path: '/explore',
-            number: 4
         },
         {
             name: 'Why Home Match?',
             path: '/advertise',
+            number: 3
+        },
+        {
+            name: 'FAQ',
+            path: '/faq',
+            number: 4
+        },
+        {
+            name: 'Explore',
+            path: '/explore',
             number: 5
-        }
+        },
+        {
+            name: 'About Us',
+            path: '/about',
+            number: 6
+        },
     ];
 
     return (
