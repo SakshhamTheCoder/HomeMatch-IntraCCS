@@ -30,11 +30,6 @@ const Navbar = () => {
             name: 'Why Home Match?',
             path: '/advertise',
             number: 5
-        },
-        {
-            name: 'Login',
-            path: '/login',
-            number: 6
         }
     ];
 

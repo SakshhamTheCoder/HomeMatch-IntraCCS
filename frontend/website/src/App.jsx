@@ -8,8 +8,6 @@ import Advertise from './pages/Advertise';
 import Footer from './components/Footer';
 import Scrollbar from './components/Scrollbar';
 import Explore from './pages/Explore';
-import Login from './pages/Login';
-import Register from './pages/Register';
 
 function Layout() {
   return (
@@ -45,14 +43,6 @@ const router = createBrowserRouter([
       {
         path: '/explore',
         element: <Explore />,
-      },
-      {
-        path: '/login',
-        element: <Login />,
-      },
-      {
-        path: '/register',
-        element: <Register />,  // Ensure Register page is included
       },
     ],
   },
