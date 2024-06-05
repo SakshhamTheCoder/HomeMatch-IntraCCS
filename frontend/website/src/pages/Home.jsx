@@ -6,9 +6,9 @@ import Image3 from '../assets/home3.jpg';
 const Home = () => {
   const images = [Image1, Image2, Image3];
   const heroData = [
-    { text1: "Find your home", text2: "the way you love" },
-    { text1: "Find your", text2: "perfect home" },
-    { text1: "Discover", text2: "your dream space" },
+    { text1: "Find your", text2: "home your way!" },
+    { text1: "Find your", text2: "perfect home!" },
+    { text1: "Find your", text2: "own dream space!" },
   ];
   const [heroCount, setHeroCount] = useState(0);
 
@@ -29,8 +29,8 @@ const Home = () => {
           alt=""
         />
       ))}
-      <div className="absolute top-1/2 left-1/4 transform -translate-y-1/2 text-black text-center">
-        <div className='bg-white bg-opacity-50 p-12 rounded-full'>
+      <div className="absolute bottom-0 left-20 transform -translate-y-1/2 text-black">
+        <div className='bg-white bg-opacity-50 p-12 rounded-full font-times'>
         <p className="text-4xl font-semibold">{heroData[heroCount].text1}</p>
         <p className="text-4xl font-semibold">{heroData[heroCount].text2}</p>
         </div>

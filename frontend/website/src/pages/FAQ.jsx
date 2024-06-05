@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'react-feather';
 import Home from '../assets/home.jpg';
-import ChatBot from 'react-simple-chatbot';
-import { Segment } from 'semantic-ui-react';
+// import ChatBot from 'react-simple-chatbot';
+// import { Segment } from 'semantic-ui-react';
 
 const Faq = () => {
   const [activeAccordion, setActiveAccordion] = useState(null);
@@ -11,9 +11,9 @@ const Faq = () => {
     setActiveAccordion(activeAccordion === index ? null : index);
   };
 
-  const steps = [
+  // const steps = [
     
-  ];
+  // ];
   
 
   return (
@@ -146,7 +146,7 @@ const Faq = () => {
       </div>
       <div className="fixed bottom-4 right-4 z-10">
         {/* <Segment> */}
-          <ChatBot 
+          {/* <ChatBot 
             steps={[
               {
                 id: 'Greet',
@@ -187,7 +187,7 @@ const Faq = () => {
               },
             ]}
             floating={true}
-            />
+            /> */}
             {/* handleEnd={() => console.log('Chat ended')} // Optional: handle the end of the chat
             userDelay={1000} // Optional: delay between bot responses for better readability
           /> */}
