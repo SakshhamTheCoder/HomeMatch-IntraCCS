@@ -10,7 +10,7 @@ import Group from '../assets/group.png';
 
 const Advertise = () => {
   return (
-    <div className="flex min-h-screen flex-col items-center pt-10"> {/* Adjusted padding top */}
+    <div className="flex min-h-screen flex-col items-center pt-10 p-10"> {/* Adjusted padding top */}
       <h1 className="text-3xl font-semibold text-[rgb(2,78,146)] mb-4">WHY DID WE FELT THE NEED TO CONSIDER THIS TOPIC?</h1>
       <h2 className='text-[17px]'>To understand the importance of this issue, let us consider the following recent news articles! </h2>
       <br/>

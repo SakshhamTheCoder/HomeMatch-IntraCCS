@@ -39,7 +39,7 @@ const Navbar = () => {
     ];
 
     return (
-        <nav className="sticky top-0 z-50 px-8 flex items-center justify-center w-full bg-red-50 rounded-b-3xl h-16">
+        <nav className="sticky top-0 z-50 px-8 flex items-center justify-center w-full bg-red-50 rounded-b-3xl h-16 ">
             <div className='flex items-center justify-start flex-1 font-bold bg-red-50'>
                 <Link to="/">
                     <p className='p-4'>Hacktify</p>
