@@ -6,16 +6,14 @@ import FAQ from './pages/FAQ';
 import About from './pages/About';
 import Advertise from './pages/Advertise';
 import Footer from './components/Footer';
-import Scrollbar from './components/Scrollbar';
 import Explore from './pages/Explore';
 
 function Layout() {
   return (
     <>
       <Navbar />
-      <Footer />
-      <Scrollbar />
       <Outlet />
+      <Footer />
     </>
   );
 }
