@@ -1,3 +1,4 @@
+// src/App.jsx
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -6,7 +7,9 @@ import About from './pages/About';
 import Advertise from './pages/Advertise';
 import Footer from './components/Footer';
 import Scrollbar from './components/Scrollbar';
-import Explore from  './pages/Explore';
+import Explore from './pages/Explore';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 function Layout() {
   return (
@@ -25,31 +28,37 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Home />
+        element: <Home />,
       },
       {
         path: '/faq',
-        element: <FAQ />
+        element: <FAQ />,
       },
       {
         path: '/about',
-        element: <About />
+        element: <About />,
       },
       {
         path: '/advertise',
-        element: <Advertise />
+        element: <Advertise />,
       },
       {
         path: '/explore',
-        element: <Explore />
-      }
-    ]
-  }
+        element: <Explore />,
+      },
+      {
+        path: '/login',
+        element: <Login />,
+      },
+      {
+        path: '/register',
+        element: <Register />,  // Ensure Register page is included
+      },
+    ],
+  },
 ]);
 
-
 function App({ routes }) {
-
   return (
     <>
       <RouterProvider router={router} />
@@ -58,4 +67,3 @@ function App({ routes }) {
 }
 
 export default App;
-
