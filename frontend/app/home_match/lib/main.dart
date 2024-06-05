@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:home_match/email_verify.dart';
@@ -13,12 +14,13 @@ void main() async {
     MaterialApp(
       title: 'HomeMatch',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue, brightness: Brightness.dark),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
       ),
       home: const RegistrationView(),
       routes: {
-        '/homepage/': (context) => const HomePage(),
+        '/homepage/': (context) => HomePage(
+              user: FirebaseAuth.instance.currentUser,
+            ),
         '/login/': (context) => const Login(),
         '/register/': (context) => const RegistrationView(),
         '/emailverify/': (context) => const EmailVerifyView(),

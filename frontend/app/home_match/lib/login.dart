@@ -73,11 +73,9 @@ class _LoginState extends State<Login> {
                         Center(
                           child: TextButton(
                             onPressed: () {
-                              Navigator.of(context).pushNamedAndRemoveUntil(
-                                  '/register/', (route) => false);
+                              Navigator.of(context).pushNamedAndRemoveUntil('/register/', (route) => false);
                             },
-                            child:
-                                const Text('Not Registered? Register Here! '),
+                            child: const Text('Not Registered? Register Here! '),
                           ),
                         ),
                         FilledButton(
@@ -86,22 +84,27 @@ class _LoginState extends State<Login> {
                               : () async {
                                   // Disable the button if _isLoggingIn is true
                                   setState(() {
-                                    _isLoggingIn =
-                                        true; // Set _isLoggingIn to true when login starts
+                                    _isLoggingIn = true; // Set _isLoggingIn to true when login starts
                                   });
 
                                   final email = _email.text;
                                   final password = _password.text;
 
                                   try {
-                                    await FirebaseAuth.instance
-                                        .signInWithEmailAndPassword(
-                                            email: email, password: password);
-                                    Navigator.of(context)
-                                        .pushNamedAndRemoveUntil(
-                                            '/homepage/', (_) => false);
-                                  } on Exception catch (e) {
-                                    print(e);
+                                    var user = await FirebaseAuth.instance
+                                        .signInWithEmailAndPassword(email: email, password: password);
+                                    if (user.user!.emailVerified) {
+                                      Navigator.of(context).pushNamedAndRemoveUntil('/homepage/', (_) => false);
+                                    } else {
+                                      Navigator.of(context).pushNamedAndRemoveUntil('/emailverify/', (_) => false);
+                                    }
+                                    Navigator.of(context).pushNamedAndRemoveUntil('/homepage/', (_) => false);
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: const Text('An error occurred. Please try again later.'),
+                                      ),
+                                    );
                                   } finally {
                                     if (mounted) {
                                       setState(() {

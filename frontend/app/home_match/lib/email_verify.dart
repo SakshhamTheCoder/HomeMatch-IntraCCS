@@ -22,42 +22,28 @@ class _EmailVerifyViewState extends State<EmailVerifyView> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 255, 255, 255),
-              letterSpacing: 2.0,
             ),
           ),
           const SizedBox(height: 20),
-          ElevatedButton(
+          FilledButton(
             onPressed: () async {
               final user = FirebaseAuth.instance.currentUser;
               await user?.sendEmailVerification();
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil('/login/', (route) => false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Verification email sent. Please login after verification."),
+                ),
+              );
+              Navigator.of(context).pushNamedAndRemoveUntil('/login/', (route) => false);
             },
             style: ButtonStyle(
-              backgroundColor:
-                  MaterialStateProperty.all<Color>(Colors.blue[500]!),
               padding: MaterialStateProperty.resolveWith<EdgeInsetsGeometry?>(
-                (states) =>
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              ),
-              overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.hovered)) {
-                    return Colors.green.withOpacity(0.1);
-                  }
-                  if (states.contains(MaterialState.focused) ||
-                      states.contains(MaterialState.pressed)) {
-                    return Colors.green.withOpacity(0.11);
-                  }
-                  return null;
-                },
+                (states) => const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
             ),
             child: const Text(
               "Send Email Verification",
-              style: TextStyle(
-                  color: Color.fromARGB(255, 255, 255, 255), fontSize: 18.0),
+              style: TextStyle(fontSize: 18.0),
             ),
           ),
         ],

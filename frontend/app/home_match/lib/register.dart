@@ -12,6 +12,7 @@ class RegistrationView extends StatefulWidget {
 class _RegistrationViewState extends State<RegistrationView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+  bool _isLoggingIn = false;
 
   @override
   void initState() {
@@ -66,71 +67,57 @@ class _RegistrationViewState extends State<RegistrationView> {
                           enableSuggestions: false,
                           autocorrect: false,
                           obscureText: true,
-                          decoration: const InputDecoration(
-                              labelText: "Password ",
-                              border: OutlineInputBorder()),
+                          decoration: const InputDecoration(labelText: "Password ", border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 20),
                         Center(
                           child: TextButton(
                             onPressed: () {
-                              Navigator.of(context).pushNamedAndRemoveUntil(
-                                  '/login/', (route) => false);
+                              Navigator.of(context).pushNamedAndRemoveUntil('/login/', (route) => false);
                             },
-                            child:
-                                const Text('Already have an account? Login!'),
+                            child: const Text('Already have an account? Login!'),
                           ),
                         ),
                         const SizedBox(height: 10),
-                        ElevatedButton(
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                Colors.blue[500]!),
-                            overlayColor:
-                                MaterialStateProperty.resolveWith<Color?>(
-                              (Set<MaterialState> states) {
-                                if (states.contains(MaterialState.hovered)) {
-                                  return Colors.blue.withOpacity(0.04);
-                                }
-                                if (states.contains(MaterialState.focused) ||
-                                    states.contains(MaterialState.pressed)) {
-                                  return Colors.blue.withOpacity(0.12);
-                                }
-                                return null; // Defer to the widget's default.
-                              },
-                            ),
-                          ),
-                          onPressed: () async {
-                            final email = _email.text;
-                            final password = _password.text;
-                            try {
-                              await FirebaseAuth.instance
-                                  .createUserWithEmailAndPassword(
-                                      email: email, password: password);
-                              Navigator.of(context).pushNamedAndRemoveUntil(
-                                  '/emailverify/', (_) => false);
-                            } on FirebaseAuthException catch (e) {
-                              if (e.code == 'weak-password') {
-                                if (kDebugMode) {
-                                  print('The password provided is too weak.');
-                                }
-                              } else if (e.code == 'email-already-in-use') {
-                                if (kDebugMode) {
-                                  print(
-                                      'The account already exists for that email.');
-                                }
-                              } else if (e.code == 'invalid-email') {
-                                if (kDebugMode) {
-                                  print(
-                                      'The email address is badly formatted.');
-                                }
-                              } else {
-                                if (kDebugMode) {
-                                  print(e.code);
-                                }
-                              }
-                            }
-                          },
+                        FilledButton(
+                          onPressed: _isLoggingIn
+                              ? null
+                              : () async {
+                                  final email = _email.text;
+                                  final password = _password.text;
+                                  setState(() {
+                                    _isLoggingIn = true;
+                                  });
+                                  try {
+                                    await FirebaseAuth.instance
+                                        .createUserWithEmailAndPassword(email: email, password: password);
+                                    Navigator.of(context).pushNamedAndRemoveUntil('/emailverify/', (_) => false);
+                                  } on FirebaseAuthException catch (e) {
+                                    if (e.code == 'weak-password') {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('The password provided is too weak.'),
+                                        ),
+                                      );
+                                    } else if (e.code == 'email-already-in-use') {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('The account already exists for that email.'),
+                                        ),
+                                      );
+                                    } else if (e.code == 'invalid-email') {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('The email address is invalid.'),
+                                        ),
+                                      );
+                                    } else {
+                                      if (kDebugMode) {
+                                        print(e.code);
+                                      }
+                                    }
+                                  }
+                                },
                           child: const Text(
                             'Register',
                           ),
