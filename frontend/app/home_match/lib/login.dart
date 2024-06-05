@@ -70,13 +70,24 @@ class _LoginState extends State<Login> {
                             border: OutlineInputBorder(),
                           ),
                         ),
+                        Center(
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                  '/register/', (route) => false);
+                            },
+                            child:
+                                const Text('Not Registered? Register Here! '),
+                          ),
+                        ),
                         FilledButton(
                           onPressed: _isLoggingIn
                               ? null
                               : () async {
                                   // Disable the button if _isLoggingIn is true
                                   setState(() {
-                                    _isLoggingIn = true; // Set _isLoggingIn to true when login starts
+                                    _isLoggingIn =
+                                        true; // Set _isLoggingIn to true when login starts
                                   });
 
                                   final email = _email.text;
@@ -84,8 +95,11 @@ class _LoginState extends State<Login> {
 
                                   try {
                                     await FirebaseAuth.instance
-                                        .signInWithEmailAndPassword(email: email, password: password);
-                                    Navigator.pushReplacementNamed(context, '/homepage');
+                                        .signInWithEmailAndPassword(
+                                            email: email, password: password);
+                                    Navigator.of(context)
+                                        .pushNamedAndRemoveUntil(
+                                            '/homepage/', (_) => false);
                                   } on Exception catch (e) {
                                     print(e);
                                   } finally {
