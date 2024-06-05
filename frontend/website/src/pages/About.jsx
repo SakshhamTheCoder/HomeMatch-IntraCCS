@@ -37,7 +37,7 @@ const About = () => {
           </div>
         ))}
       </div>
-      <p className='pt-3'>You may check us out at our social media handles! ❤️</p>
+      <p className='pt-3 text-center'>You may check us out at our social media handles! ❤️</p>
     </div>
   );
 };
