@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -91,6 +92,14 @@ class _RegistrationViewState extends State<RegistrationView> {
                                   try {
                                     await FirebaseAuth.instance
                                         .createUserWithEmailAndPassword(email: email, password: password);
+                                    FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                                        .set({
+                                      'email': email,
+                                      'uid': FirebaseAuth.instance.currentUser!.uid,
+                                      'preferences': [],
+                                    });
                                     Navigator.of(context).pushNamedAndRemoveUntil('/emailverify/', (_) => false);
                                   } on FirebaseAuthException catch (e) {
                                     if (e.code == 'weak-password') {

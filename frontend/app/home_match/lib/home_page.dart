@@ -11,6 +11,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final _isRecommended = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,25 +33,31 @@ class _HomePageState extends State<HomePage> {
                   );
                 }).toList();
               },
-              barHintText: 'Search for properties',
+              barHintText: 'Search for areas, localities, etc.',
               onSubmitted: (query) {
                 print('Searching for $query');
               },
             ),
             const SizedBox(height: 20),
             Expanded(
-                child: ListView(
-                    children: ListingModel.getListings().map((listing) {
-              return Card(
-                child: ListTile(
-                  leading: Image.network(
-                      "https://aliferous.ca/wp-content/uploads/2022/02/rental-listing-optimization-tips.jpg"),
-                  title: Text(listing.name),
-                  subtitle: Text('${listing.bhk} BHK, ${listing.area} sqft, ${listing.location}'),
-                  trailing: Text('₹ ${listing.price}'),
-                ),
-              );
-            }).toList()))
+                child: _isRecommended
+                    ? ListView(
+                        children: ListingModel.getListings().map((listing) {
+                        return Card(
+                          child: ListTile(
+                            leading: Image.network(
+                                "https://aliferous.ca/wp-content/uploads/2022/02/rental-listing-optimization-tips.jpg"),
+                            title: Text(listing.name),
+                            subtitle: Text('${listing.bhk} BHK, ${listing.area} sqft, ${listing.location}'),
+                            trailing: Text('₹ ${listing.price}'),
+                          ),
+                        );
+                      }).toList())
+                    : const Center(
+                        child: Text(
+                        'No recommendations found. Start searching and tagging!',
+                        textAlign: TextAlign.center,
+                      )))
           ])),
     );
   }
