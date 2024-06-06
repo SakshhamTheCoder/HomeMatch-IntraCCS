@@ -6,6 +6,13 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        arial: ['Arial', 'sans-serif'],
+        times: ['Times New Roman', 'Times', 'serif'],
+        roboto: ['Roboto', 'sans-serif'],
+        georgia: ['Georgia', 'serif'],
+        courier: ['Courier New', 'monospace'],
+      },
       colors:{
         customBlack: 'rgb(200,204,153)'
       }

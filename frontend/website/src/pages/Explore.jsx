@@ -4,7 +4,8 @@ import { ChevronDown } from 'react-feather';
 
 const containerStyle = {
   width: '100%',
-  height: '100%'
+  height: '100%',
+  minHeight: '300px' // Added minimum height to ensure visibility
 };
 
 const center = {
@@ -127,72 +128,73 @@ const ExplorePage = () => {
     setSelectedCapital(capital);
   };
 
-  const toggleState = (stateName) => {
-    console.log('State toggled:', stateName);
-    setExpandedState(expandedState === stateName ? null : stateName);
-  };
+const toggleState = (stateName) => {
+  console.log('State toggled:', stateName);
+  setExpandedState(expandedState === stateName ? null : stateName);
+};
 
-  return (
-    <div className="flex h-screen">
-  <div className="w-1/2 overflow-y-auto py-16 pt-0"> {/* Added py-16 for padding */}
-    <div className="text-center py-4">
-      <h2 className="text-2xl font-semibold">Wanting to explore the places of United States? Do so here!</h2>
-    </div>
-    {states.map((state, index) => (
-      <div key={state.name} className="border-b border-gray-200 p-4">
-        <div
-          className="flex justify-between items-center cursor-pointer"
-          onClick={() => toggleState(state.name)}
-        >
-          {state.number}. {state.name}
-          <ChevronDown
-            className={`transition-transform duration-300 ${
-              expandedState === state.name ? 'transform rotate-180' : ''
-            }`}
-            color="rgb(25, 45, 394)"
-          />
-        </div>
-        {expandedState === state.name && (
-          <div className="pl-4 mt-2">
-            {capitals
-              .filter((capital) => capital.state === state.name)
-              .map((capital, capitalIndex) => (
-                <div
-                  key={capital.name}
-                  className="cursor-pointer py-2"
-                  onClick={() => handleCapitalClick(capital)}
-                >
-                  <div>
-                    <p className='font-semibold inline-block'>Capital: </p> {capital.name}
-                  </div>
-                  <div>
-                    <p className='font-semibold inline-block'>Latitude: </p> {capital.location.lat}
-                  </div>
-                  <div>
-                    <p className='font-semibold inline-block'>Longitude: </p> {capital.location.lng}
-                  </div>
-                </div>
-              ))}
-            {/* Add padding to create space */}
-            {index === states.length - 1 && <div style={{ paddingBottom: '2rem' }}></div>}
-          </div>
-        )}
+return (
+  <div className="flex flex-col md:flex-row h-screen">
+    <div className="w-full md:w-1/2 overflow-y-auto py-16 md:py-0 md:pt-8"> {/* Added py-16 for padding */}
+      <div className="text-center md:pl-3">
+        <h2 className="text-2xl text-center font-semibold pl-3">Wanting to explore the places of United States? Do so here!</h2>
       </div>
-    ))}
+      <br/>
+      {states.map((state, index) => (
+        <div key={state.name} className="border-b border-gray-200 p-4">
+          <div
+            className="flex justify-between items-center cursor-pointer"
+            onClick={() => toggleState(state.name)}
+          >
+            {state.number}. {state.name}
+            <ChevronDown
+              className={`transition-transform duration-300 ${
+                expandedState === state.name ? 'transform rotate-180' : ''
+              }`}
+              color="rgb(25, 45, 394)"
+            />
+          </div>
+          {expandedState === state.name && (
+            <div className="pl-4 mt-2">
+              {capitals
+                .filter((capital) => capital.state === state.name)
+                .map((capital, capitalIndex) => (
+                  <div
+                    key={capital.name}
+                    className="cursor-pointer py-2"
+                    onClick={() => handleCapitalClick(capital)}
+                  >
+                    <div>
+                      <p className='font-semibold inline-block'>Capital: </p> {capital.name}
+                    </div>
+                    <div>
+                      <p className='font-semibold inline-block'>Latitude: </p> {capital.location.lat}
+                    </div>
+                    <div>
+                      <p className='font-semibold inline-block'>Longitude: </p> {capital.location.lng}
+                    </div>
+                  </div>
+                ))}
+              {/* Add padding to create space */}
+              {index === states.length - 1 && <div style={{ paddingBottom: '2rem' }}></div>}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+    <div className="w-full md:w-1/2">
+      <LoadScript googleMapsApiKey="AIzaSyDpNYsaMtdkZHXXAR2uWLY9r2UtYL8ooqo">
+        <GoogleMap
+          mapContainerStyle={containerStyle}
+          center={selectedCapital ? selectedCapital.location : center}
+          zoom={selectedCapital ? 10 : 4}
+        >
+          {selectedCapital && <Marker position={selectedCapital.location} />}
+        </GoogleMap>
+      </LoadScript>
+    </div>
   </div>
-  <div className="w-1/2">
-    <LoadScript googleMapsApiKey="AIzaSyDpNYsaMtdkZHXXAR2uWLY9r2UtYL8ooqo">
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={selectedCapital ? selectedCapital.location : center}
-        zoom={selectedCapital ? 10 : 4}
-      >
-        {selectedCapital && <Marker position={selectedCapital.location} />}
-      </GoogleMap>
-    </LoadScript>
-  </div>
-</div>
-  );
+);
 };
 
 export default ExplorePage;

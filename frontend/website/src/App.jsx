@@ -7,6 +7,7 @@ import About from './pages/About';
 import Advertise from './pages/Advertise';
 import Footer from './components/Footer';
 import Explore from './pages/Explore';
+import Detail from './pages/Content';
 
 function Layout() {
   return (
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
       {
         path: '/explore',
         element: <Explore />,
+      },
+      {
+        path: '/content',
+        element: <Detail />,
       },
     ],
   },
