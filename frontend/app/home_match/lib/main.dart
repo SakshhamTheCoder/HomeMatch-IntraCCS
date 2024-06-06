@@ -8,6 +8,7 @@ import 'package:home_match/home_page.dart';
 import 'package:home_match/login.dart';
 import 'package:home_match/provider.dart';
 import 'package:home_match/register.dart';
+import 'package:home_match/tag_page.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -15,24 +16,21 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => FavouriteProvider(),
-      child: MaterialApp(
-        title: 'HomeMatch',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.blue, brightness: Brightness.dark),
-        ),
-        home: const RegistrationView(),
-        routes: {
-          '/homepage/': (context) => HomePage(
-                user: FirebaseAuth.instance.currentUser,
-              ),
-          '/login/': (context) => const Login(),
-          '/register/': (context) => const RegistrationView(),
-          '/emailverify/': (context) => const EmailVerifyView(),
-        },
+    MaterialApp(
+      title: 'HomeMatch',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
       ),
+      home: const RegistrationView(),
+      routes: {
+        '/homepage/': (context) => HomePage(
+              user: FirebaseAuth.instance.currentUser,
+            ),
+        '/login/': (context) => const Login(),
+        '/register/': (context) => const RegistrationView(),
+        '/emailverify/': (context) => const EmailVerifyView(),
+        '/tags/': (context) => const TagPage(),
+      },
     ),
   );
 }

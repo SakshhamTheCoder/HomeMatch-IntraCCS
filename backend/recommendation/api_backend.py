@@ -1,13 +1,13 @@
-from firebase_admin import firestore, initialize_app
-from firebase_admin import credentials
-import pandas as pd
-from surprise import Dataset, Reader, SVD
-import csv
+from fastapi import FastAPI
+from pydantic import BaseModel
 import os
 import requests
-from dotenv import load_dotenv
+import pandas as pd
+from surprise import Dataset, Reader, SVD
+from typing import List
+from firebase_admin import credentials, firestore, initialize_app
 
-load_dotenv()
+app = FastAPI()
 
 # Initialize Firebase Admin SDK
 cred = credentials.Certificate("my-ccs-firebase-adminsdk-m88uu-159e3d5c8b.json")
@@ -15,17 +15,42 @@ initialize_app(cred)
 db = firestore.client()
 
 
-def get_user_input(user_preferences):
+class UserPreferences(BaseModel):
+    min_budget: float
+    max_budget: float
+    min_bedrooms: int
+    min_bathrooms: int
+    city: str
+    province: str
+    propertyType: list
 
-    # make changes to work with user input from frontend
+
+class UploadPropertiesRequest(BaseModel):
+    records: List[dict]
+    user_id: str
+
+
+class PreprocessDataRequest(BaseModel):
+    properties: list
+    user_id: str
+
+
+class GetSimilarPropertiesRequest(BaseModel):
+    user_id: str
+    tagged_properties: list
+    user_preferences: dict
+
+
+@app.post("/get_user_input")
+async def get_user_input(user_preferences: UserPreferences):
     # Retrieve user preferences with default values
-    min_budget = user_preferences.get("min_budget", 0)
-    max_budget = user_preferences.get("max_budget", 10000000)
-    min_bedrooms = user_preferences.get("min_bedrooms", 0)
-    min_bathrooms = user_preferences.get("min_bathrooms", 0)
-    city = user_preferences["city"]
-    province = user_preferences["province"]
-    property_types = user_preferences.get("propertyType", [])
+    min_budget = user_preferences.min_budget
+    max_budget = user_preferences.max_budget
+    min_bedrooms = user_preferences.min_bedrooms
+    min_bathrooms = user_preferences.min_bathrooms
+    city = user_preferences.city
+    province = user_preferences.province
+    property_types = user_preferences.propertyType
 
     query = (
         'country:"US" AND latitude:* AND longitude:* AND postalCode:* AND address:*'
@@ -49,10 +74,11 @@ def get_user_input(user_preferences):
 
     num_records = 5
 
-    return query, num_records
+    return {"query": query, "num_records": num_records}
 
 
-def fetch_properties_from_api(query, num_records):
+@app.post("/fetch_properties_from_api")
+async def fetch_properties_from_api(query: str, num_records: int):
     api_url = "https://api.datafiniti.co/v4/properties/search"
     api_token = os.getenv("API_KEY")
     headers = {
@@ -73,41 +99,12 @@ def fetch_properties_from_api(query, num_records):
         return []
 
 
-# To be Removed
-def save_properties_to_csv(records, filename):
-    important_columns = [
-        "id",
-        "address",
-        "propertyType",
-        "numBedroom",
-        "numBathroom",
-        "numRoom",
-        "numFloor",
-        "numUnit",
-        "numParkingSpaces",
-        "parkingTypes",
-        "floorSizeValue",
-        "lotSizeValue",
-        "yearBuilt",
-        "mostRecentPriceAmount",
-        "latitude",
-        "longitude",
-        "city",
-        "province",
-        "postalCode",
-    ]
+@app.post("/upload_properties_to_firestore")
+async def upload_properties_to_firestore(request: UploadPropertiesRequest):
+    records = request.records
+    user_id = request.user_id
 
-    with open(filename, "w", newline="") as file:
-        dict_writer = csv.DictWriter(file, fieldnames=important_columns)
-        dict_writer.writeheader()
-
-        for record in records:
-            filtered_record = {key: record.get(key, "") for key in important_columns}
-            dict_writer.writerow(filtered_record)
-
-
-def upload_properties_to_firestore(properties, user_id):
-    for property in properties:
+    for property in records:
         property_id = property["id"]
         property_ref = db.collection("properties").document(property_id)
         property_doc = property_ref.get()
@@ -138,8 +135,8 @@ def upload_properties_to_firestore(properties, user_id):
             property_ref.set(property_data)
 
 
-# Edit this to work with frontend
-def fetch_user_tagged_properties(user_id):
+@app.post("/fetch_user_tagged_properties")
+async def fetch_user_tagged_properties(user_id: str):
     properties_ref = db.collection("properties")
     query = properties_ref.where(
         field_path="user_ids", op_string="array_contains", value=user_id
@@ -152,19 +149,10 @@ def fetch_user_tagged_properties(user_id):
     return user_properties
 
 
-# have to change this function(instead of stroing all data on db, we store temporarly and then delete it after use)
-# Fetch all properties from Firestore(by all, we mean the properties from inital response and tagged properties)
-def fetch_all_properties():
-    properties_ref = db.collection("properties")
-    docs = properties_ref.stream()
-    all_properties = []
-    for doc in docs:
-        property_data = doc.to_dict()
-        all_properties.append(property_data)
-    return all_properties
-
-
-def preprocess_data(properties, user_id):
+@app.post("/preprocess_data")
+async def preprocess_data_endpoint(request: PreprocessDataRequest):
+    properties = request.properties
+    user_id = request.user_id
     df = pd.DataFrame(properties)
     df["user_id"] = user_id
     df["combined_features"] = df.apply(
@@ -180,12 +168,14 @@ def preprocess_data(properties, user_id):
         ),
         axis=1,
     )
-    return df
+    return df.to_dict(orient="records")
 
 
-def train_svd_model(user_properties, user_id):
-    df = preprocess_data(user_properties, user_id)
-    df["rating"] = 1  # Use a constant rating since users have tagged these properties
+@app.post("/train_svd_model")
+async def train_svd_model_endpoint(user_properties: list, user_id: str):
+    df = pd.DataFrame(user_properties)
+    df["user_id"] = user_id
+    df["rating"] = 1
 
     reader = Reader(rating_scale=(1, 1))
     data = Dataset.load_from_df(df[["user_id", "id", "rating"]], reader)
@@ -194,13 +184,16 @@ def train_svd_model(user_properties, user_id):
     algo = SVD()
     algo.fit(trainset)
 
-    return algo
+    return {"message": "SVD model trained successfully"}
 
 
-def get_similar_properties(user_id, tagged_properties, user_preferences, top_n=4):
+@app.post("/get_similar_properties")
+async def get_similar_properties_endpoint(request: GetSimilarPropertiesRequest):
+    user_id = request.user_id
+    tagged_properties = request.tagged_properties
+    user_preferences = request.user_preferences
 
     # Extract relevant information from tagged properties
-    # ask if city is a good feature to use as it is being assigned initially by user
     tagged_cities = set(property["city"] for property in tagged_properties)
     tagged_property_types = set(
         property["propertyType"] for property in tagged_properties
@@ -215,7 +208,6 @@ def get_similar_properties(user_id, tagged_properties, user_preferences, top_n=4
         "AND city:(" + " OR ".join([f'"{city}"' for city in tagged_cities]) + ")"
     )
 
-    # change this to take the inital preferences
     # Add user preferences to the query
     min_budget = user_preferences.get("min_budget", 0)
     max_budget = user_preferences.get("max_budget", 10000000)

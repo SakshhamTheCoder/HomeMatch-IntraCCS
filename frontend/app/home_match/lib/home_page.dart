@@ -1,13 +1,10 @@
-// import 'dart:ffi';
-// import 'dart:js_interop';
+import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:home_match/favouriteListing.dart';
-import 'package:home_match/provider.dart';
 import 'package:home_match/views/listings.dart';
-import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   final User? user;
@@ -18,309 +15,244 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<ListingModel> _foundUsers = ListingModel.getListings();
-  double _minArea = 100;
-  double _maxArea = 10000;
-  double _minPrice = 1000000;
-  double _maxPrice = 100000000;
-  late RangeValues _areaValues;
-  late RangeValues _priceValues;
+  final _isRecommended = true;
+  final List<ListingModel> listings = [];
 
-  void _getInitialInfo() {
-    _foundUsers = ListingModel.getListings();
-    _minArea = _foundUsers
-        .map((user) => user.area)
-        .reduce((min, area) => min < area ? min : area) as double;
-    _maxArea = _foundUsers
-        .map((user) => user.area)
-        .reduce((max, area) => max > area ? max : area) as double;
+  final _cityController = TextEditingController();
+  final _provinceController = TextEditingController();
+  final _minBedroomsController = TextEditingController();
+  final _minBathroomsController = TextEditingController();
+  final _minPriceController = TextEditingController();
+  final _maxPriceController = TextEditingController();
+  final _propertyTypeController = TextEditingController();
 
-    _priceValues = RangeValues(
-      _foundUsers
-          .map((user) => user.price)
-          .reduce((min, price) => min < price ? min : price),
-      _foundUsers
-          .map((user) => user.price)
-          .reduce((max, price) => max > price ? max : price),
-    );
-    _areaValues = RangeValues(
-      _foundUsers
-          .map((user) => user.area)
-          .reduce((min, area) => min < area ? min : area) as double,
-      _foundUsers
-          .map((user) => user.area)
-          .reduce((max, area) => max > area ? max : area) as double,
-    );
-    // _setRangeArea();
-    // _setRangePrice();
-  }
-
-  void _runFilter2() {
-    List<ListingModel> results = [];
-    results = ListingModel.getListings()
-        .where((user) =>
-            user.area >= _areaValues.start &&
-            user.area <= _areaValues.end &&
-            user.price >= _priceValues.start &&
-            user.price <= _priceValues.end)
-        .toList();
-    setState(() {
-      _foundUsers = results;
-    });
-  }
-
-  void _runFilter1(String enteredKeyword) {
-    List<ListingModel> results = [];
-    if (enteredKeyword.isEmpty) {
-      results = ListingModel.getListings();
-    } else {
-      results = ListingModel.getListings()
-              .where((user) => user.name
-                  .toLowerCase()
-                  .contains(enteredKeyword.toLowerCase()))
-              .toList() +
-          ListingModel.getListings()
-              .where((user) => user.location
-                  .toLowerCase()
-                  .contains(enteredKeyword.toLowerCase()))
-              .toList() +
-          ListingModel.getListings()
-              .where((user) =>
-                  user.area.toString().contains(enteredKeyword.toLowerCase()))
-              .toList() +
-          ListingModel.getListings()
-              .where((user) =>
-                  user.bhk.toString().contains(enteredKeyword.toLowerCase()))
-              .toList() +
-          ListingModel.getListings()
-              .where((user) =>
-                  user.price.toString().contains(enteredKeyword.toLowerCase()))
-              .toList();
-    }
-
-    setState(() {
-      _foundUsers = results;
-    });
-  }
-
-  void _setRangeArea() {
-    _maxArea = _foundUsers[0].area as double;
-    _minArea = _foundUsers[0].area as double;
-    for (int i = 0; i < _foundUsers.length; i++) {
-      if (_foundUsers[i].area < _minArea) {
-        _minArea = _foundUsers[i].area as double;
-      }
-      if (_foundUsers[i].area > _maxArea) {
-        _maxArea = _foundUsers[i].area as double;
-      }
-    }
-    _areaValues = RangeValues(_minArea, _maxArea);
-  }
-
-  void _setRangePrice() {
-    _maxPrice = _foundUsers[0].price;
-    _minPrice = _foundUsers[0].price;
-    for (int i = 0; i < _foundUsers.length; i++) {
-      if (_foundUsers[i].price < _minPrice) {
-        _minPrice = _foundUsers[i].price;
-      }
-      if (_foundUsers[i].price > _maxPrice) {
-        _maxPrice = _foundUsers[i].price;
-      }
-    }
-    _priceValues = RangeValues(_minPrice, _maxPrice);
-  }
-
-  // final _isRecommended = true;
-  bool settingVariable = true;
   @override
   Widget build(BuildContext context) {
-    _getInitialInfo();
-    final provider = Provider.of<FavouriteProvider>(context);
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('HomeMatch'),
-          centerTitle: true,
-        ),
-        //
-        body: Column(
-          children: [
-            const SizedBox(
-              height: 20,
+      bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: TextField(
-                  onChanged: (value) => _runFilter1(value),
-                  decoration: InputDecoration(
-                    labelText: 'Search',
-                    // suffixIcon: Icon(Icons.search),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.filter_list),
-                      onPressed: () {
-                        settingVariable = !settingVariable;
-                        setState(() {});
-                      },
-                    ),
-                  )),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Tags',
             ),
-            const SizedBox(
-              height: 20,
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle),
+              label: 'Profile',
             ),
-            settingVariable
-                ? Expanded(
-                    child: _foundUsers.length == 0
-                        ? const Center(
-                            child: Text(
-                            'No recommendations found. Start searching and tagging!',
-                            textAlign: TextAlign.center,
-                          ))
-                        : Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: ListView.builder(
-                              itemCount: _foundUsers.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return Card(
-                                  key: ValueKey(_foundUsers[index].id),
-                                  elevation: 4,
-                                  margin: const EdgeInsets.all(8),
-                                  child: ListTile(
-                                    leading: Image.network(
-                                        "https://aliferous.ca/wp-content/uploads/2022/02/rental-listing-optimization-tips.jpg"),
-                                    title: Text(_foundUsers[index].name),
-                                    subtitle: Text(
-                                        '${_foundUsers[index].bhk} BHK, ${_foundUsers[index].area} sqft, ${_foundUsers[index].location}'),
-                                    // trailing:
-                                    //     Text('₹ ${_foundUsers[index].price}'),
-                                    trailing: IconButton(
-                                      icon: Icon(provider.isFavourite(
-                                              _foundUsers[index].id.toString())
-                                          ? Icons.favorite
-                                          : Icons.favorite_border),
-                                      onPressed: () {
-                                        provider.toggleFavourite(
-                                            _foundUsers[index].id.toString());
-                                        // _foundUsers.removeAt(index);
-                                        // setState(() {});
-                                      },
-                                    ),
-                                    //                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                  )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const Text(
-                        'Filter',
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const Text('Area'),
-                      Center(
-                          child: RangeSlider(
-                        values: _areaValues,
-                        min: _minArea,
-                        max: _maxArea,
-                        onChanged: (newValues) {
-                          if (kDebugMode) {
-                            print(
-                                "${_areaValues.start.round()} ${_areaValues.end.round()}");
-                          }
-                          setState(() {
-                            _areaValues = newValues;
-                          });
-                        },
-                      )),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const Text('Price'),
-                      Center(
-                        child: RangeSlider(
-                          values: _priceValues,
-                          min: _minPrice,
-                          max: _maxPrice,
-                          onChanged: (newValues) {
-                            if (kDebugMode) {
-                              print(
-                                  "${_priceValues.start.round()} ${_priceValues.end.round()}");
-                            }
-                            setState(() {
-                              _priceValues = newValues;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
           ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            final route = MaterialPageRoute(
-              builder: (context) => FavouritePage(),
-            );
-            Navigator.push(context, route);
-          },
-          child: const Icon(Icons.favorite),
-        ));
+          onTap: (index) {
+            if (index == 1) {
+              Navigator.pushNamed(context, '/tags/');
+            }
+          }),
+      appBar: AppBar(
+        title: const Text('HomeMatch'),
+        centerTitle: true,
+      ),
+      body: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(children: [
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            scrollable: true,
+                            title: const Text('Search Listings'),
+                            content: Column(
+                              children: [
+                                TextField(
+                                  controller: _cityController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'City',
+                                    hintText: 'Ex: New York',
+                                  ),
+                                ),
+                                TextField(
+                                  controller: _provinceController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Province',
+                                    hintText: 'Ex: CA',
+                                  ),
+                                ),
+                                TextField(
+                                  controller: _minBedroomsController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Min Bedrooms',
+                                    hintText: 'Ex: 2',
+                                  ),
+                                ),
+                                TextField(
+                                  controller: _minBathroomsController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Min Bathrooms',
+                                    hintText: 'Ex: 4',
+                                  ),
+                                ),
+                                TextField(
+                                  controller: _minPriceController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Min Price',
+                                    hintText: 'Ex: 1000',
+                                  ),
+                                ),
+                                TextField(
+                                  controller: _maxPriceController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Max Price',
+                                    hintText: 'Ex: 1000',
+                                  ),
+                                ),
+                                DropdownButtonFormField(
+                                  items: ['Apartment', 'Single Family Dwelling'].map((type) {
+                                    return DropdownMenuItem(
+                                      value: type,
+                                      child: Text(type),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    _propertyTypeController.text = value.toString();
+                                  },
+                                  decoration: const InputDecoration(
+                                    labelText: 'Property Type',
+                                    hintText: 'Ex: Apartment',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                              TextButton(
+                                  onPressed: () {
+                                    final city = _cityController.text;
+                                    final province = _provinceController.text;
+                                    final minBedrooms = _minBedroomsController.text;
+                                    final minBathrooms = _minBathroomsController.text;
+                                    final minPrice = _minPriceController.text;
+                                    final maxPrice = _maxPriceController.text;
+                                    final propertyType = _propertyTypeController.text;
+
+                                    http.post(Uri.parse("http://127.0.0.1:8000/get_user_properties"), body: {
+                                      'city': city,
+                                      'province': province,
+                                      'min_bedrooms': minBedrooms,
+                                      'min_bathrooms': minBathrooms,
+                                      'min_budget': minPrice,
+                                      'max_budget': maxPrice,
+                                      'property_type': propertyType,
+                                    }).then((response) {
+                                      if (response.statusCode == 200) {
+                                        var queryStr = jsonDecode(response.body)['query'];
+                                        http
+                                            .post(Uri.parse(
+                                                "http://127.0.0.1:8000/fetch_properties_from_api?query=$queryStr?num_records=5"))
+                                            .then((response) {
+                                          if (response.statusCode == 200) {
+                                            var properties = jsonDecode(response.body)['records'];
+                                            print(properties);
+                                            properties.forEach((property) {
+                                              setState(() {
+                                                listings.add(ListingModel(
+                                                    city: property['city'],
+                                                    province: property['province'],
+                                                    lat: property['latitute'],
+                                                    lng: property['longitude'],
+                                                    numBedroom: property['numBedroom'],
+                                                    numBathroom: property['numBathroom'],
+                                                    floorSizeValue: property['floorSizeValue'],
+                                                    propertyType: property['property_type'],
+                                                    mostRecentPriceAmount: property['prices']['amountMax']));
+                                              });
+                                            });
+                                          } else {
+                                            print(response.body);
+                                            print('Failed to fetch propertie2s');
+                                          }
+                                        });
+                                      } else {
+                                        print(response.body);
+                                        print('Failed to fetch properties');
+                                      }
+                                    });
+
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Search')),
+                            ],
+                          );
+                        });
+                  },
+                  child: Text('Search Listings')),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+                child: listings.isNotEmpty
+                    ? ListView(
+                        children: listings.map((listing) {
+                        return Card(
+                          child: ListTile(
+                            leading: Image.network(
+                                "https://aliferous.ca/wp-content/uploads/2022/02/rental-listing-optimization-tips.jpg"),
+                            title: Text(listing.address!),
+                            subtitle: Text('${listing.numBedroom} BHK, sqft, ${listing.city}'),
+                            trailing: Text('₹ ${listing.mostRecentPriceAmount}'),
+                            onTap: () async {
+                              // if property is already present in one of the document in properties collecction then update the userid in that
+                              // document else add a new document in properties collection
+                              if (await FirebaseFirestore.instance
+                                  .collection('properties')
+                                  .where('address', isEqualTo: listing.address)
+                                  .get()
+                                  .then((value) => value.docs.isNotEmpty)) {
+                                await FirebaseFirestore.instance
+                                    .collection('properties')
+                                    .where('address', isEqualTo: listing.address)
+                                    .get()
+                                    .then((value) async {
+                                  var docId = value.docs[0].id;
+                                  var userIds = value.docs[0].data()['userId'];
+                                  userIds.add(widget.user!.uid);
+                                  await FirebaseFirestore.instance.collection('properties').doc(docId).update({
+                                    'userId': userIds,
+                                  });
+                                });
+                              }
+                              await FirebaseFirestore.instance.collection('properties').add({
+                                'address': listing.address,
+                                'city': listing.city,
+                                'province': listing.province,
+                                'latitude': listing.lat,
+                                'longitude': listing.lng,
+                                'numBedroom': listing.numBedroom,
+                                'numBathroom': listing.numBathroom,
+                                'mostRecentPriceAmount': listing.mostRecentPriceAmount,
+                                'floorSizeValue': listing.floorSizeValue,
+                                'propertyType': listing.propertyType,
+                                'userId': [
+                                  widget.user!.uid,
+                                ]
+                              });
+                            },
+                          ),
+                        );
+                      }).toList())
+                    : const Center(
+                        child: Text(
+                        'No listing found. Start searching and tagging!',
+                        textAlign: TextAlign.center,
+                      )))
+          ])),
+    );
   }
 }
-
-
-
-
-// Sakshham's Code for reference
-//  body: Padding(
-      //     padding: const EdgeInsets.all(20),
-      //     child: Column(children: [
-      //       SearchAnchor.bar(
-      //         suggestionsBuilder: (context, controller) {
-      //           return ListingModel.getListings().map((listing) {
-      //             return ListTile(
-      //               title: Text(listing.name),
-      //               onTap: () {
-      //                 controller.text = listing.name;
-      //               },
-      //             );
-      //           }).toList();
-      //         },
-      //         barHintText: 'Search for areas, localities, etc.',
-      //         onSubmitted: (query) {
-      //           print('Searching for $query');
-      //         },
-      //       ),
-      //       const SizedBox(height: 20),
-      //       Expanded(
-      //           child: _isRecommended
-      //               ? ListView(
-      //                   children: ListingModel.getListings().map((listing) {
-      //                   return Card(
-      //                     child: ListTile(
-      //                       leading: Image.network(
-      //                           "https://aliferous.ca/wp-content/uploads/2022/02/rental-listing-optimization-tips.jpg"),
-      //                       title: Text(listing.name),
-      //                       subtitle: Text(
-      //                           '${listing.bhk} BHK, ${listing.area} sqft, ${listing.location}'),
-      //                       trailing: Text('₹ ${listing.price}'),
-      //                     ),
-      //                   );
-      //                 }).toList())
-      //               : const Center(
-      //                   child: Text(
-      //                   'No recommendations found. Start searching and tagging!',
-      //                   textAlign: TextAlign.center,
-      //                 )))
-      //     ])),
