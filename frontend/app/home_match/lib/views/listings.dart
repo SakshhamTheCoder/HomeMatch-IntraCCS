@@ -1,5 +1,5 @@
-
 class ListingModel {
+  int id;
   String name;
   String image;
   int bhk;
@@ -7,6 +7,7 @@ class ListingModel {
   double price;
   String location;
   ListingModel({
+    required this.id,
     required this.name,
     required this.image,
     required this.bhk,
@@ -20,6 +21,7 @@ class ListingModel {
 
     listings.add(
       ListingModel(
+        id: 1,
         name: '2 BHK Apartment',
         image: './photos/house.jpg',
         bhk: 2,
@@ -29,6 +31,7 @@ class ListingModel {
       ),
     );
     listings.add(ListingModel(
+      id: 2,
       name: '3 BHK Apartment',
       image: './photos/house.jpg',
       bhk: 3,
@@ -37,6 +40,7 @@ class ListingModel {
       location: 'Indiranagar',
     ));
     listings.add(ListingModel(
+      id: 3,
       name: '1 BHK Apartment',
       image: './photos/house.jpg',
       bhk: 1,
@@ -45,6 +49,7 @@ class ListingModel {
       location: 'HSR Layout',
     ));
     listings.add(ListingModel(
+      id: 4,
       name: '4 BHK Apartment',
       image: './photos/house.jpg',
       bhk: 4,
@@ -53,6 +58,7 @@ class ListingModel {
       location: 'Whitefield',
     ));
     listings.add(ListingModel(
+      id: 5,
       name: '2 BHK Apartment',
       image: './photos/house.jpg',
       bhk: 2,
@@ -61,6 +67,7 @@ class ListingModel {
       location: 'Koramangala',
     ));
     listings.add(ListingModel(
+      id: 6,
       name: '3 BHK Apartment',
       image: './photos/house.jpg',
       bhk: 3,
@@ -69,6 +76,7 @@ class ListingModel {
       location: 'Indiranagar',
     ));
     listings.add(ListingModel(
+      id: 7,
       name: '1 BHK Apartment',
       image: './photos/house.jpg',
       bhk: 1,
@@ -77,6 +85,7 @@ class ListingModel {
       location: 'HSR Layout',
     ));
     listings.add(ListingModel(
+      id: 8,
       name: '4 BHK Apartment',
       image: './photos/house.jpg',
       bhk: 4,
