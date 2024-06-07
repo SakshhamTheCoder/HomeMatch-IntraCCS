@@ -95,7 +95,7 @@ class _HomePageState extends State<HomePage> {
                                   keyboardType: TextInputType.number,
                                   decoration: const InputDecoration(
                                     labelText: 'Min Bathrooms',
-                                    hintText: 'Ex: 4',
+                                    hintText: 'Ex: 2',
                                   ),
                                 ),
                                 TextField(
@@ -103,7 +103,7 @@ class _HomePageState extends State<HomePage> {
                                   keyboardType: TextInputType.number,
                                   decoration: const InputDecoration(
                                     labelText: 'Min Price',
-                                    hintText: 'Ex: 1000',
+                                    hintText: 'Ex: 10000',
                                   ),
                                 ),
                                 TextField(
@@ -111,7 +111,7 @@ class _HomePageState extends State<HomePage> {
                                   keyboardType: TextInputType.number,
                                   decoration: const InputDecoration(
                                     labelText: 'Max Price',
-                                    hintText: 'Ex: 1000',
+                                    hintText: 'Ex: 50000',
                                   ),
                                 ),
                                 DropdownButtonFormField(
@@ -143,45 +143,62 @@ class _HomePageState extends State<HomePage> {
                                     final maxPrice = _maxPriceController.text;
                                     final propertyType = _propertyTypeController.text;
 
-                                    http.post(Uri.parse("http://127.0.0.1:8000/get_user_properties"), body: {
+                                    var body = {
                                       'city': city,
                                       'province': province,
-                                      'min_bedrooms': minBedrooms,
-                                      'min_bathrooms': minBathrooms,
-                                      'min_budget': minPrice,
-                                      'max_budget': maxPrice,
+                                      'min_bedrooms': int.parse(minBedrooms),
+                                      'min_bathrooms': int.parse(minBathrooms),
+                                      'min_budget': int.parse(minPrice),
+                                      'max_budget': int.parse(maxPrice),
                                       'property_type': propertyType,
-                                    }).then((response) {
+                                    };
+
+                                    http
+                                        .post(
+                                      Uri.parse("http://127.0.0.1:8000/get_user_input"),
+                                      headers: <String, String>{
+                                        'Content-Type': 'application/json; charset=UTF-8',
+                                      },
+                                      body: json.encode(body),
+                                    )
+                                        .then((response) {
                                       if (response.statusCode == 200) {
                                         var queryStr = jsonDecode(response.body)['query'];
-                                        http
-                                            .post(Uri.parse(
-                                                "http://127.0.0.1:8000/fetch_properties_from_api?query=$queryStr?num_records=5"))
-                                            .then((response) {
+                                        print(queryStr);
+                                        var numRecords = (jsonDecode(response.body)['num_records']);
+                                        http.post(
+                                            Uri.parse(
+                                                "http://127.0.0.1:8000/fetch_properties_from_api?query=$queryStr&num_records=$numRecords"),
+                                            headers: <String, String>{
+                                              'Content-Type': 'application/json; charset=UTF-8',
+                                            }).then((response) {
                                           if (response.statusCode == 200) {
-                                            var properties = jsonDecode(response.body)['records'];
-                                            print(properties);
-                                            properties.forEach((property) {
+                                            var properties = jsonDecode(response.body);
+                                            print(properties.length);
+                                            for (var property in properties) {
+                                              print(
+                                                  'city: ${property['city']}, province: ${property['province']}, lat: ${property['latitute']}, lng: ${property['longitude']}, numBedroom: ${property['numBedroom']}, numBathroom: ${property['numBathroom']}, floorSizeValue: ${property['floorSizeValue']}, propertyType: ${property['propertyType']}, mostRecentPriceAmount: ${property['mostRecentPriceAmount']}, address: ${property['address']}');
+
                                               setState(() {
                                                 listings.add(ListingModel(
-                                                    city: property['city'],
-                                                    province: property['province'],
-                                                    lat: property['latitute'],
-                                                    lng: property['longitude'],
-                                                    numBedroom: property['numBedroom'],
-                                                    numBathroom: property['numBathroom'],
-                                                    floorSizeValue: property['floorSizeValue'],
-                                                    propertyType: property['property_type'],
-                                                    mostRecentPriceAmount: property['prices']['amountMax']));
+                                                  city: property['city'],
+                                                  province: property['province'],
+                                                  lat: property['latitute'],
+                                                  lng: property['longitude'],
+                                                  numBedroom: property['numBedroom'],
+                                                  numBathroom: property['numBathroom'],
+                                                  floorSizeValue: property['floorSizeValue'],
+                                                  propertyType: property['propertyType'],
+                                                  mostRecentPriceAmount: property['mostRecentPriceAmount'],
+                                                  address: property['address'],
+                                                ));
                                               });
-                                            });
+                                            }
                                           } else {
-                                            print(response.body);
                                             print('Failed to fetch propertie2s');
                                           }
                                         });
                                       } else {
-                                        print(response.body);
                                         print('Failed to fetch properties');
                                       }
                                     });
@@ -200,12 +217,21 @@ class _HomePageState extends State<HomePage> {
                 child: listings.isNotEmpty
                     ? ListView(
                         children: listings.map((listing) {
+                        listing.city = listing.city == 'null' ? 'N/A' : listing.city;
+                        listing.province = listing.province == 'null' ? 'N/A' : listing.province;
+                        listing.numBedroom = listing.numBedroom == 'null' ? 'N/A' : listing.numBedroom;
+                        listing.numBathroom = listing.numBathroom == 'null' ? 'N/A' : listing.numBathroom;
+                        listing.floorSizeValue = listing.floorSizeValue == 'null' ? 'N/A' : listing.floorSizeValue;
+                        listing.propertyType = listing.propertyType == 'null' ? 'N/A' : listing.propertyType;
+                        listing.mostRecentPriceAmount =
+                            listing.mostRecentPriceAmount == 'null' ? 'N/A' : listing.mostRecentPriceAmount;
+                        listing.address = listing.address == 'null' ? 'N/A' : listing.address;
                         return Card(
                           child: ListTile(
                             leading: Image.network(
                                 "https://aliferous.ca/wp-content/uploads/2022/02/rental-listing-optimization-tips.jpg"),
                             title: Text(listing.address!),
-                            subtitle: Text('${listing.numBedroom} BHK, sqft, ${listing.city}'),
+                            subtitle: Text('${listing.numBedroom} BHK, ${listing.city}'),
                             trailing: Text('₹ ${listing.mostRecentPriceAmount}'),
                             onTap: () async {
                               // if property is already present in one of the document in properties collecction then update the userid in that

@@ -28,7 +28,7 @@ class TagPage extends StatelessWidget {
                                 "https://aliferous.ca/wp-content/uploads/2022/02/rental-listing-optimization-tips.jpg"),
                             title: Text(listing.address!),
                             subtitle: Text('${listing.numBedroom} BHK, sqft, ${listing.city}'),
-                            trailing: Text('₹ ${listing.price}'),
+                            trailing: Text('₹ ${listing.mostRecentPriceAmount}'),
                           ),
                         );
                       }).toList())

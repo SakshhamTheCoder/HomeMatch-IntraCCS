@@ -6,6 +6,9 @@ import pandas as pd
 from surprise import Dataset, Reader, SVD
 from typing import List
 from firebase_admin import credentials, firestore, initialize_app
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -22,7 +25,7 @@ class UserPreferences(BaseModel):
     min_bathrooms: int
     city: str
     province: str
-    propertyType: list
+    property_type: str
 
 
 class UploadPropertiesRequest(BaseModel):
@@ -50,7 +53,7 @@ async def get_user_input(user_preferences: UserPreferences):
     min_bathrooms = user_preferences.min_bathrooms
     city = user_preferences.city
     province = user_preferences.province
-    property_types = user_preferences.propertyType
+    property_type = user_preferences.property_type
 
     query = (
         'country:"US" AND latitude:* AND longitude:* AND postalCode:* AND address:*'
@@ -68,11 +71,20 @@ async def get_user_input(user_preferences: UserPreferences):
     query += f' AND (city:"{city}")'
 
     # Add user-preferred property types to the query
-    if property_types:
-        property_type_query = " OR ".join([f'"{prop}"' for prop in property_types])
-        query += f" AND propertyType:({property_type_query})"
+    if property_type:
+        # property_type_query = " OR ".join([f'"{prop}"' for prop in property_type])
+        query += f" AND propertyType:({property_type})"
 
     num_records = 5
+    print(
+        min_budget,
+        max_budget,
+        min_bedrooms,
+        min_bathrooms,
+        city,
+        province,
+        property_type,
+    )
 
     return {"query": query, "num_records": num_records}
 
@@ -82,16 +94,20 @@ async def fetch_properties_from_api(query: str, num_records: int):
     api_url = "https://api.datafiniti.co/v4/properties/search"
     api_token = os.getenv("API_KEY")
     headers = {
-        "accept": "application/json",
         "Authorization": f"Bearer {api_token}",
         "content-type": "application/json",
     }
 
-    payload = {"query": query, "num_records": num_records}
+    payload = {
+        "query": query,
+        "num_records": num_records,
+        "format": "JSON",
+    }
 
     response = requests.post(api_url, json=payload, headers=headers)
 
     if response.status_code == 200:
+        print(response.content)
         data = response.json()
         return data.get("records", [])
     else:
@@ -195,7 +211,7 @@ async def get_similar_properties_endpoint(request: GetSimilarPropertiesRequest):
 
     # Extract relevant information from tagged properties
     tagged_cities = set(property["city"] for property in tagged_properties)
-    tagged_property_types = set(
+    tagged_property_type = set(
         property["propertyType"] for property in tagged_properties
     )
 
@@ -203,7 +219,7 @@ async def get_similar_properties_endpoint(request: GetSimilarPropertiesRequest):
     new_query = (
         'country:"US" AND latitude:* AND longitude:* AND postalCode:* '
         "AND propertyType:("
-        + " OR ".join([f'"{prop}"' for prop in tagged_property_types])
+        + " OR ".join([f'"{prop}"' for prop in tagged_property_type])
         + ") "
         "AND city:(" + " OR ".join([f'"{city}"' for city in tagged_cities]) + ")"
     )

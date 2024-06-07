@@ -1,15 +1,15 @@
 class ListingModel {
-  String? address;
-  String? city;
-  String? province;
-  String? lat;
-  String? lng;
-  int? numBedroom;
-  int? numBathroom;
-  int? floorSizeValue;
-  int? mostRecentPriceAmount;
-  String? postalCode;
-  String? propertyType;
+  var address;
+  var city;
+  var province;
+  var lat;
+  var lng;
+  var numBedroom;
+  var numBathroom;
+  var floorSizeValue;
+  var mostRecentPriceAmount;
+  var postalCode;
+  var propertyType;
 
   ListingModel({
     this.address,
