@@ -56,24 +56,24 @@ async def get_user_input(user_preferences: UserPreferences):
     property_type = user_preferences.property_type
 
     query = (
-        'country:"US" AND latitude:* AND longitude:* AND postalCode:* AND address:*'
-        "AND floorSizeValue:* AND lotSizeValue:* AND mostRecentPriceAmount:*"
-        "AND numBathroom:* AND numBedroom:* AND numFloor:* AND numRoom:*"
-        "AND numUnit:* AND numParkingSpaces:* AND parkingTypes:*"
-        'AND mostRecentStatus:("For Sale" OR "Rental")'
+        'country:"US"'
+        " AND floorSizeValue:[1 TO *] AND mostRecentPriceAmount:[1 TO *]"
+        # "AND numBathroom:* AND numBedroom:*"
+        ' AND mostRecentStatus:("For Sale" OR "Rental")'
     )
 
     # Format the user preferences into the query
-    query += f" AND mostRecentPriceAmount:[{min_budget} TO {max_budget}]"
+    # query += f" AND mostRecentPriceAmount:[{min_budget} TO {max_budget}]"
+    query += f" AND {{prices.amountMin:[{min_budget} TO {max_budget}] AND prices.currency:USD}}"
     query += f" AND numBedroom:[{min_bedrooms} TO *]"
     query += f" AND numBathroom:[{min_bathrooms} TO *]"
-    query += f' AND (province:"{province}")'
-    query += f' AND (city:"{city}")'
+    query += f' AND province:("{province}")'
+    query += f' AND city:("{city}")'
 
     # Add user-preferred property types to the query
     if property_type:
         # property_type_query = " OR ".join([f'"{prop}"' for prop in property_type])
-        query += f" AND propertyType:({property_type})"
+        query += f' AND propertyType:"{property_type}"'
 
     num_records = 5
     print(
@@ -85,6 +85,8 @@ async def get_user_input(user_preferences: UserPreferences):
         province,
         property_type,
     )
+
+    # myquery = 'city:("New York") AND province:("NY") AND {prices.amountMin:[1 TO 1000000] AND prices.currency:USD} AND numBedroom:[1 TO *] AND numBathroom:[1 TO *] AND mostRecentPriceAmount:* AND propertyType:"Apartment"'
 
     return {"query": query, "num_records": num_records}
 
@@ -107,10 +109,10 @@ async def fetch_properties_from_api(query: str, num_records: int):
     response = requests.post(api_url, json=payload, headers=headers)
 
     if response.status_code == 200:
-        print(response.content)
         data = response.json()
         return data.get("records", [])
     else:
+        print(response.content)
         print(f"Failed to fetch properties: {response.status_code}")
         return []
 
@@ -175,7 +177,7 @@ async def preprocess_data_endpoint(request: PreprocessDataRequest):
         lambda row: " ".join(
             [
                 str(row["city"]),
-                str(row["propertyType"]),
+                str(row["property_type"]),
                 str(row["numBedroom"]),
                 str(row["numBathroom"]),
                 str(row["floorSizeValue"]),
@@ -212,7 +214,7 @@ async def get_similar_properties_endpoint(request: GetSimilarPropertiesRequest):
     # Extract relevant information from tagged properties
     tagged_cities = set(property["city"] for property in tagged_properties)
     tagged_property_type = set(
-        property["propertyType"] for property in tagged_properties
+        property["property_type"] for property in tagged_properties
     )
 
     # Construct a new query based on tagged properties and user preferences
@@ -237,6 +239,77 @@ async def get_similar_properties_endpoint(request: GetSimilarPropertiesRequest):
     new_query += f" AND numBathroom:[{min_bathrooms} TO *]"
     new_query += f' AND (province:"{province}")'
     new_query += f' AND (city:"{city}")'
+
+    num_records = 5
+
+    # Make a new API call to fetch properties based on the updated query
+    fetched_properties = fetch_properties_from_api(new_query, num_records)
+
+    return fetched_properties
+
+
+@app.post("/get_user_recommendations")
+async def get_user_recommendations_endpoint(user_id: str, user_preferences: dict):
+    properties_ref = db.collection("properties")
+    query = properties_ref.where(
+        field_path="user_ids", op_string="array_contains", value=user_id
+    )
+    docs = query.stream()
+    tagged_properties = []
+    for doc in docs:
+        property_data = doc.to_dict()
+        tagged_properties.append(property_data)
+    df = pd.DataFrame(tagged_properties)
+    df["user_id"] = user_id
+    df["combined_features"] = df.apply(
+        lambda row: " ".join(
+            [
+                str(row["city"]),
+                str(row["property_type"]),
+                str(row["numBedroom"]),
+                str(row["numBathroom"]),
+                str(row["floorSizeValue"]),
+                str(row["mostRecentPriceAmount"]),
+            ]
+        ),
+        axis=1,
+    )
+    df["rating"] = 1
+
+    reader = Reader(rating_scale=(1, 1))
+    data = Dataset.load_from_df(df[["user_id", "id", "rating"]], reader)
+    trainset = data.build_full_trainset()
+
+    algo = SVD()
+    algo.fit(trainset)
+
+    tagged_cities = set(property["city"] for property in tagged_properties)
+    tagged_property_type = set(
+        property["property_type"] for property in tagged_properties
+    )
+
+    # Construct a new query based on tagged properties and user preferences
+    new_query = (
+        'country:"US" AND latitude:* AND longitude:* AND postalCode:* '
+        "AND propertyType:("
+        + " OR ".join([f'"{prop}"' for prop in tagged_property_type])
+        + ") "
+        "AND city:(" + " OR ".join([f'"{city}"' for city in tagged_cities]) + ")"
+    )
+
+    # Add user preferences to the query
+    min_budget = user_preferences.get("min_budget", 0)
+    max_budget = user_preferences.get("max_budget", 10000000)
+    min_bedrooms = user_preferences.get("min_bedrooms", 0)
+    min_bathrooms = user_preferences.get("min_bathrooms", 0)
+    city = user_preferences["city"]
+    province = user_preferences["province"]
+
+    new_query += f" AND numBedroom:[{min_bedrooms} TO *]"
+    new_query += f" AND numBathroom:[{min_bathrooms} TO *]"
+    new_query += f' AND (province:"{province}")'
+    new_query += f' AND (city:"{city}")'
+    new_query += f" AND {{prices.amountMin:[{min_budget} TO {max_budget}] AND prices.currency:USD}}"
 
     num_records = 5
 

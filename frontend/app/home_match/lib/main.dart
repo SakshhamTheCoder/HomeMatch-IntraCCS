@@ -1,15 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:home_match/email_verify.dart';
 import 'package:home_match/firebase_options.dart';
 import 'package:home_match/home_page.dart';
 import 'package:home_match/login.dart';
-import 'package:home_match/provider.dart';
 import 'package:home_match/register.dart';
 import 'package:home_match/tag_page.dart';
-import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

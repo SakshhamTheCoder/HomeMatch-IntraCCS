@@ -10,6 +10,7 @@ class ListingModel {
   var mostRecentPriceAmount;
   var postalCode;
   var propertyType;
+  var image;
 
   ListingModel({
     this.address,
@@ -23,6 +24,7 @@ class ListingModel {
     this.mostRecentPriceAmount,
     this.postalCode,
     this.propertyType,
+    this.image,
   });
 
   // static List<ListingModel> getListings() {

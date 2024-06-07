@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var preferences;
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
@@ -152,6 +153,7 @@ class _HomePageState extends State<HomePage> {
                                       'max_budget': int.parse(maxPrice),
                                       'property_type': propertyType,
                                     };
+                                    preferences = body;
 
                                     http
                                         .post(
@@ -174,6 +176,9 @@ class _HomePageState extends State<HomePage> {
                                             }).then((response) {
                                           if (response.statusCode == 200) {
                                             var properties = jsonDecode(response.body);
+                                            setState(() {
+                                              listings.clear();
+                                            });
                                             print(properties.length);
                                             for (var property in properties) {
                                               print(
@@ -202,7 +207,6 @@ class _HomePageState extends State<HomePage> {
                                         print('Failed to fetch properties');
                                       }
                                     });
-
                                     Navigator.pop(context);
                                   },
                                   child: const Text('Search')),
@@ -217,42 +221,90 @@ class _HomePageState extends State<HomePage> {
                 child: listings.isNotEmpty
                     ? ListView(
                         children: listings.map((listing) {
-                        listing.city = listing.city == 'null' ? 'N/A' : listing.city;
-                        listing.province = listing.province == 'null' ? 'N/A' : listing.province;
-                        listing.numBedroom = listing.numBedroom == 'null' ? 'N/A' : listing.numBedroom;
-                        listing.numBathroom = listing.numBathroom == 'null' ? 'N/A' : listing.numBathroom;
-                        listing.floorSizeValue = listing.floorSizeValue == 'null' ? 'N/A' : listing.floorSizeValue;
-                        listing.propertyType = listing.propertyType == 'null' ? 'N/A' : listing.propertyType;
-                        listing.mostRecentPriceAmount =
-                            listing.mostRecentPriceAmount == 'null' ? 'N/A' : listing.mostRecentPriceAmount;
-                        listing.address = listing.address == 'null' ? 'N/A' : listing.address;
+                        var city = listing.city ?? 'N/A';
+                        var province = listing.province ?? 'N/A';
+                        var address = listing.address ?? 'N/A';
+                        var numBedroom = listing.numBedroom ?? 'N/A';
+                        var numBathroom = listing.numBathroom ?? 'N/A';
+                        var floorSizeValue = listing.floorSizeValue ?? 'N/A';
+                        var propertyType = listing.propertyType ?? 'N/A';
+                        var mostRecentPriceAmount = listing.mostRecentPriceAmount ?? 'N/A';
+
                         return Card(
                           child: ListTile(
                             leading: Image.network(
                                 "https://aliferous.ca/wp-content/uploads/2022/02/rental-listing-optimization-tips.jpg"),
-                            title: Text(listing.address!),
-                            subtitle: Text('${listing.numBedroom} BHK, ${listing.city}'),
-                            trailing: Text('₹ ${listing.mostRecentPriceAmount}'),
+                            title: Text(address),
+                            subtitle: Text('${numBedroom} BHK, ${city} ${province}'),
+                            trailing: Text('\$ ${mostRecentPriceAmount}'),
                             onTap: () async {
                               // if property is already present in one of the document in properties collecction then update the userid in that
                               // document else add a new document in properties collection
                               if (await FirebaseFirestore.instance
                                   .collection('properties')
                                   .where('address', isEqualTo: listing.address)
+                                  .where('price', isEqualTo: listing.mostRecentPriceAmount)
                                   .get()
                                   .then((value) => value.docs.isNotEmpty)) {
+                                if (await FirebaseFirestore.instance
+                                    .collection('properties')
+                                    .where('address', isEqualTo: listing.address)
+                                    .where('price', isEqualTo: listing.mostRecentPriceAmount)
+                                    .where('userId', arrayContains: widget.user!.uid)
+                                    .get()
+                                    .then((value) => value.docs.isNotEmpty)) {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                    content: Text('You have already tagged this property!'),
+                                  ));
+                                  return;
+                                }
                                 await FirebaseFirestore.instance
                                     .collection('properties')
                                     .where('address', isEqualTo: listing.address)
+                                    .where('price', isEqualTo: listing.mostRecentPriceAmount)
                                     .get()
-                                    .then((value) async {
-                                  var docId = value.docs[0].id;
-                                  var userIds = value.docs[0].data()['userId'];
-                                  userIds.add(widget.user!.uid);
-                                  await FirebaseFirestore.instance.collection('properties').doc(docId).update({
-                                    'userId': userIds,
+                                    .then((value) {
+                                  for (var element in value.docs) {
+                                    element.reference.update({
+                                      'userId': FieldValue.arrayUnion([widget.user!.uid])
+                                    });
+                                  }
+                                }).then((value) {
+                                  http
+                                      .post(Uri.parse(
+                                          "http://127.0.0.1:8000/get_user_recommendations?user_id=${widget.user!.uid}&user_preferences=$preferences"))
+                                      .then((response) {
+                                    if (response.statusCode == 200) {
+                                      var properties = jsonDecode(response.body);
+                                      print(properties.length);
+                                      for (var property in properties) {
+                                        print(
+                                            'city: ${property['city']}, province: ${property['province']}, lat: ${property['latitute']}, lng: ${property['longitude']}, numBedroom: ${property['numBedroom']}, numBathroom: ${property['numBathroom']}, floorSizeValue: ${property['floorSizeValue']}, propertyType: ${property['propertyType']}, mostRecentPriceAmount: ${property['mostRecentPriceAmount']}, address: ${property['address']}');
+
+                                        setState(() {
+                                          listings.add(ListingModel(
+                                            city: property['city'],
+                                            province: property['province'],
+                                            lat: property['latitute'],
+                                            lng: property['longitude'],
+                                            numBedroom: property['numBedroom'],
+                                            numBathroom: property['numBathroom'],
+                                            floorSizeValue: property['floorSizeValue'],
+                                            propertyType: property['propertyType'],
+                                            mostRecentPriceAmount: property['mostRecentPriceAmount'],
+                                            address: property['address'],
+                                          ));
+                                        });
+                                      }
+                                    } else {
+                                      print('Failed to fetch propertie2s3');
+                                    }
                                   });
                                 });
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                  content: Text('Property tagged successfully!'),
+                                ));
+                                return;
                               }
                               await FirebaseFirestore.instance.collection('properties').add({
                                 'address': listing.address,
@@ -265,10 +317,42 @@ class _HomePageState extends State<HomePage> {
                                 'mostRecentPriceAmount': listing.mostRecentPriceAmount,
                                 'floorSizeValue': listing.floorSizeValue,
                                 'propertyType': listing.propertyType,
-                                'userId': [
-                                  widget.user!.uid,
-                                ]
+                                'userId': [widget.user!.uid]
+                              }).then((value) {
+                                http
+                                    .post(Uri.parse(
+                                        "http://127.0.0.1:8000/get_user_recommendations?user_id=${widget.user!.uid}&user_preferences=$preferences"))
+                                    .then((response) {
+                                  if (response.statusCode == 200) {
+                                    var properties = jsonDecode(response.body);
+                                    print(properties.length);
+                                    for (var property in properties) {
+                                      print(
+                                          'city: ${property['city']}, province: ${property['province']}, lat: ${property['latitute']}, lng: ${property['longitude']}, numBedroom: ${property['numBedroom']}, numBathroom: ${property['numBathroom']}, floorSizeValue: ${property['floorSizeValue']}, propertyType: ${property['propertyType']}, mostRecentPriceAmount: ${property['mostRecentPriceAmount']}, address: ${property['address']}');
+
+                                      setState(() {
+                                        listings.add(ListingModel(
+                                          city: property['city'],
+                                          province: property['province'],
+                                          lat: property['latitute'],
+                                          lng: property['longitude'],
+                                          numBedroom: property['numBedroom'],
+                                          numBathroom: property['numBathroom'],
+                                          floorSizeValue: property['floorSizeValue'],
+                                          propertyType: property['propertyType'],
+                                          mostRecentPriceAmount: property['mostRecentPriceAmount'],
+                                          address: property['address'],
+                                        ));
+                                      });
+                                    }
+                                  } else {
+                                    print('Failed to fetch propertie2s3');
+                                  }
+                                });
                               });
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                content: Text('Property tagged successfully!'),
+                              ));
                             },
                           ),
                         );
