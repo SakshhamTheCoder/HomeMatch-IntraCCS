@@ -43,7 +43,7 @@ class _TagPageState extends State<TagPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favorite Listings'),
+        title: const Text('Tagged Properties'),
       ),
       body: Center(
         child: Column(
@@ -56,9 +56,9 @@ class _TagPageState extends State<TagPage> {
                           child: ListTile(
                             leading: Image.network(
                                 "https://aliferous.ca/wp-content/uploads/2022/02/rental-listing-optimization-tips.jpg"),
-                            title: Text(listing.address!),
-                            subtitle: Text('${listing.numBedroom} BHK, ${listing.city}'),
-                            trailing: Text('₹ ${listing.mostRecentPriceAmount}'),
+                            title: Text(listing.address ?? 'N/A'),
+                            subtitle: Text('${listing.numBedroom ?? 'N/A'} BHK, ${listing.city ?? 'N/A'}'),
+                            trailing: Text('₹ ${listing.mostRecentPriceAmount ?? 'N/A'}'),
                           ),
                         );
                       }).toList())
