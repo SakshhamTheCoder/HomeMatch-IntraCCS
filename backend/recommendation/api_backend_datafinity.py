@@ -101,21 +101,27 @@ async def get_user_recommendations_endpoint(request: GetUserRecommendationsReque
     user_preferences = request.user_preferences
 
     properties_ref = db.collection("properties")
-    query = properties_ref.where(field_path="user_ids", op_string="array_contains", value=user_id)
+    query = properties_ref.where("user_ids", "array_contains", user_id)
     docs = query.stream()
     tagged_properties = [doc.to_dict() for doc in docs]
+
+    if not tagged_properties:
+        raise HTTPException(status_code=404, detail="No tagged properties found for the user")
+
+    if not all("id" in prop for prop in tagged_properties):
+        raise HTTPException(status_code=500, detail="Missing 'id' in some properties")
 
     df = pd.DataFrame(tagged_properties)
     df["user_id"] = user_id
     df["combined_features"] = df.apply(
         lambda row: " ".join(
             [
-                str(row["city"]),
-                str(row["propertyType"]),
-                str(row["numBedroom"]),
-                str(row["numBathroom"]),
-                str(row["floorSizeValue"]),
-                str(row["mostRecentPriceAmount"]),
+                str(row.get("city", "")),
+                str(row.get("propertyType", "")),
+                str(row.get("numBedroom", "")),
+                str(row.get("numBathroom", "")),
+                str(row.get("floorSizeValue", "")),
+                str(row.get("mostRecentPriceAmount", "")),
             ]
         ),
         axis=1,
@@ -155,9 +161,10 @@ async def get_user_recommendations_endpoint(request: GetUserRecommendationsReque
 
     num_records = 5
 
-    fetched_properties = fetch_properties_from_api(FetchPropertiesRequest(query=new_query, num_records=num_records))
+    fetched_properties = await fetch_properties_from_api(FetchPropertiesRequest(query=new_query, num_records=num_records))
     
     return fetched_properties
+
 
 
 

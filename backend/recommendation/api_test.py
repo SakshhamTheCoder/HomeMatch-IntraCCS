@@ -24,7 +24,10 @@ def test_fetch_properties_from_api(query, num_records):
     url = f"{base_url}/fetch_properties_from_api"
     payload = {"query": query, "num_records": num_records}
     response = requests.post(url, json=payload)
-    print("Response from /fetch_properties_from_api:", response.json())
+    try:
+        print("Response from /fetch_properties_from_api:", response.json())
+    except requests.exceptions.JSONDecodeError:
+        print(f"Failed to decode JSON response: {response.content}")
 
 # Test /get_user_recommendations endpoint
 def test_get_user_recommendations():
@@ -41,7 +44,10 @@ def test_get_user_recommendations():
     }
     payload = {"user_id": user_id, "user_preferences": user_preferences}
     response = requests.post(url, json=payload)
-    print("Response from /get_user_recommendations:", response.json())
+    try:
+        print("Response from /get_user_recommendations:", response.json())
+    except requests.exceptions.JSONDecodeError:
+        print(f"Failed to decode JSON response: {response.content}")
 
 # Run tests
 if __name__ == "__main__":
